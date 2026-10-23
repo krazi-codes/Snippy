@@ -2,7 +2,7 @@
 
 Orchestrate Claude with a free local router. Snippy uses a model running on your
 own machine (via **Ollama**) to decide how to handle each task, then runs the
-real work on **Claude** — spawning cheap sub-model workers for the easy parts,
+real work on **Claude** spawning cheap sub-model workers for the easy parts,
 keeping the main conversation's **prompt cache** warm, and showing you exactly
 what you saved.
 
@@ -13,7 +13,7 @@ what you saved.
    which Claude sub-model should handle each piece, and whether to split the
    task into parallel subtasks. This routing is **free** and never hits your
    Claude bill.
-3. You can **edit the plan** — change a subtask's model, merge/split/edit
+3. You can **edit the plan** change a subtask's model, merge/split/edit
    subtasks, or send the whole thing to the main model instead.
 4. Approved subtasks run as **stateless, parallel Claude calls**. Each worker
    has its own tiny context and is discarded when it returns.
@@ -22,7 +22,7 @@ what you saved.
    directly; complex ones let the main model synthesize.
 
 If Ollama isn't running, Snippy falls back to a built-in **local heuristic
-router** so it still works — and tells you it's in fallback mode.
+router** so it still works and tells you it's in fallback mode.
 
 ## What you save
 
@@ -30,7 +30,7 @@ Snippy tracks three buckets, shown in a collapsible widget and the status bar:
 
 - **Downshift** — running easy subtasks on a cheaper Claude model instead of the
   main one (net of overhead, never negative).
-- **Prompt cache reuse** — re-reading the stable prefix at the cache rate
+- **Prompt cache reuse**- re-reading the stable prefix at the cache rate
   (~10% of input) instead of full price on every turn.
 - **Free local routing** — routing on Ollama instead of paying for a Haiku
   router call.
