@@ -1,7 +1,41 @@
 import { test, assert } from './helpers';
 import { PricingCalculator } from '../src/pricing';
 import { ModelInfo } from '../src/models';
+import { test, assert } from './helpers';
+import { PricingCalculator } from '../src/pricing';
+import { ModelInfo } from '../src/models';
 
+const model: ModelInfo = {
+  id: 'x',
+  displayName: 'X',
+  inputPricePerMTok: 3,
+  outputPricePerMTok: 15
+};
+
+test('costFor input tokens', () => {
+  const p = new PricingCalculator();
+  // 1,000,000 input tokens at $3/MTok = $3
+  assert.strictEqual(p.costFor(1_000_000, model, 'input'), 3);
+});
+
+test('costFor output tokens uses output price', () => {
+  const p = new PricingCalculator();
+  assert.strictEqual(p.costFor(1_000_000, model, 'output'), 15);
+});
+
+test('costFor scales linearly and clamps negatives', () => {
+  const p = new PricingCalculator();
+  assert.strictEqual(p.costFor(500_000, model, 'input'), 1.5);
+  assert.strictEqual(p.costFor(0, model, 'input'), 0);
+  assert.strictEqual(p.costFor(-10, model, 'input'), 0);
+});
+
+test('formatUsd formats small and large amounts', () => {
+  const p = new PricingCalculator();
+  assert.strictEqual(p.formatUsd(0), '$0.00');
+  assert.strictEqual(p.formatUsd(0.0003), '$0.0003');
+  assert.strictEqual(p.formatUsd(2.5), '$2.50');
+});
 const main: ModelInfo = {
   id: 'opus', displayName: 'Opus', inputPricePerMTok: 15, outputPricePerMTok: 75,
   cacheReadMultiplier: 0.1, cacheWriteMultiplier: 1.25
