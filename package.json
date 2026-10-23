@@ -1,87 +1,65 @@
 {
   "name": "snippy",
   "displayName": "Snippy",
-  "description": "Trim the deadweight from your Claude chats and see what you save.",
-  "version": "0.1.0",
+  "description": "Orchestrate Claude with a free local Ollama router: spawn cheap sub-model workers, keep the prompt cache warm, and see what you save.",
+  "version": "0.2.0",
   "publisher": "your-publisher",
   "license": "MIT",
   "icon": "media/icon.png",
-  "engines": {
-    "vscode": "^1.85.0"
-  },
-  "categories": [
-    "Machine Learning",
-    "Other"
-  ],
-  "keywords": [
-    "claude",
-    "anthropic",
-    "tokens",
-    "cost",
-    "chat",
-    "ai"
-  ],
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/your-publisher/snippy.git"
-  },
+  "engines": { "vscode": "^1.85.0" },
+  "categories": ["Machine Learning", "Other"],
+  "keywords": ["claude", "anthropic", "ollama", "orchestrator", "router", "cost", "ai"],
+  "repository": { "type": "git", "url": "https://github.com/your-publisher/snippy.git" },
   "main": "./dist/extension.js",
   "activationEvents": [],
   "contributes": {
     "viewsContainers": {
       "activitybar": [
-        {
-          "id": "snippy",
-          "title": "Snippy",
-          "icon": "media/sidebar-icon.svg"
-        }
+        { "id": "snippy", "title": "Snippy", "icon": "media/sidebar-icon.svg" }
       ]
     },
     "views": {
       "snippy": [
-        {
-          "id": "snippy.chat",
-          "name": "Snippy",
-          "type": "webview"
-        }
+        { "id": "snippy.panel", "name": "Snippy", "type": "webview" }
       ]
     },
     "commands": [
-      {
-        "command": "snippy.setApiKey",
-        "title": "Snippy: Set API Key"
-      },
-      {
-        "command": "snippy.clearApiKey",
-        "title": "Snippy: Clear API Key"
-      },
-      {
-        "command": "snippy.focus",
-        "title": "Snippy: Open Panel"
-      }
+      { "command": "snippy.setApiKey", "title": "Snippy: Set API Key" },
+      { "command": "snippy.clearApiKey", "title": "Snippy: Clear API Key" },
+      { "command": "snippy.focus", "title": "Snippy: Open Panel" }
     ],
     "configuration": {
       "title": "Snippy",
       "properties": {
-        "snippy.defaultModel": {
+        "snippy.mainModel": {
           "type": "string",
           "default": "claude-sonnet-4-5-20250929",
-          "description": "Default Claude model id used for new chats and token counting."
-        },
-        "snippy.tokenCountDebounceMs": {
-          "type": "number",
-          "default": 500,
-          "description": "Debounce window (ms) before calling the token-counting API while typing."
+          "description": "Claude model that owns the main conversation (session-fixed)."
         },
         "snippy.maxTokens": {
           "type": "number",
           "default": 1024,
-          "description": "max_tokens sent to the Anthropic Messages API for replies."
+          "description": "max_tokens for Claude replies."
+        },
+        "snippy.enablePromptCache": {
+          "type": "boolean",
+          "default": true,
+          "description": "Mark the stable system prefix with cache_control so repeat turns bill at the cache-read rate."
+        },
+        "snippy.ollama.baseUrl": {
+          "type": "string",
+          "default": "http://localhost:11434",
+          "description": "Base URL of your local Ollama server."
+        },
+        "snippy.ollama.routerModel": {
+          "type": "string",
+          "default": "llama3.1",
+          "description": "Ollama model used (for free) to route tasks. Must be pulled locally."
         },
         "snippy.priceOverrides": {
           "type": "object",
           "default": {},
-          "description": "Optional per-model price overrides. Map of modelId -> { inputPricePerMTok, outputPricePerMTok } in USD per million tokens.",
+          "description": "Per-model price overrides (USD per MTok): { modelId: { inputPricePerMTok, outputPricePerMTok } }.",
           "additionalProperties": {
             "type": "object",
             "properties": {
