@@ -1,94 +1,114 @@
 {
   "name": "snippy",
   "displayName": "Snippy",
-  "description": "Orchestrate Claude with a free local Ollama router: spawn cheap sub-model workers, keep the prompt cache warm, and see what you save.",
-  "version": "0.2.0",
+  "description": "Orchestrate Claude to cut costs with intelligent routing",
+  "version": "0.0.1",
   "publisher": "your-publisher",
-  "license": "MIT",
-  "icon": "media/icon.png",
-  "engines": { "vscode": "^1.85.0" },
-  "categories": ["Machine Learning", "Other"],
-  "keywords": ["claude", "anthropic", "ollama", "orchestrator", "router", "cost", "ai"],
-  "repository": { "type": "git", "url": "https://github.com/your-publisher/snippy.git" },
-  "main": "./dist/extension.js",
-  "activationEvents": [],
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./out/extension.js",
+  "browser": "./out/webview/provider.js",
   "contributes": {
+    "commands": [
+      {
+        "command": "snippy.setApiKey",
+        "title": "Snippy: Set API Key"
+      },
+      {
+        "command": "snippy.clearApiKey",
+        "title": "Snippy: Clear API Key"
+      },
+      {
+        "command": "snippy.openPanel",
+        "title": "Snippy: Open Panel"
+      }
+    ],
     "viewsContainers": {
       "activitybar": [
-        { "id": "snippy", "title": "Snippy", "icon": "media/sidebar-icon.svg" }
+        {
+          "id": "snippy-view-container",
+          "title": "Snippy",
+          "icon": "media/sidebar-icon.svg"
+        }
       ]
     },
     "views": {
-      "snippy": [
-        { "id": "snippy.panel", "name": "Snippy", "type": "webview" }
+      "snippy-view-container": [
+        {
+          "id": "snippy-webview",
+          "name": "Snippy Panel"
+        }
       ]
     },
-    "commands": [
-      { "command": "snippy.setApiKey", "title": "Snippy: Set API Key" },
-      { "command": "snippy.clearApiKey", "title": "Snippy: Clear API Key" },
-      { "command": "snippy.focus", "title": "Snippy: Open Panel" }
-    ],
+    "menus": {
+      "view/title": [
+        {
+          "command": "snippy.openPanel",
+          "when": "view == snippy-webview",
+          "group": "navigation"
+        }
+      ]
+    },
     "configuration": {
       "title": "Snippy",
       "properties": {
         "snippy.mainModel": {
           "type": "string",
-          "default": "claude-sonnet-4-5-20250929",
-          "description": "Claude model that owns the main conversation (session-fixed)."
+          "default": "claude-3-5-sonnet-latest",
+          "description": "Main Claude model for the session"
         },
         "snippy.maxTokens": {
-          "type": "number",
-          "default": 1024,
-          "description": "max_tokens for Claude replies."
+          "type": "integer",
+          "default": 4096,
+          "description": "Maximum tokens for Claude responses"
         },
         "snippy.enablePromptCache": {
           "type": "boolean",
           "default": true,
-          "description": "Mark the stable system prefix with cache_control so repeat turns bill at the cache-read rate."
+          "description": "Enable prompt cache optimization"
         },
         "snippy.ollama.baseUrl": {
           "type": "string",
           "default": "http://localhost:11434",
-          "description": "Base URL of your local Ollama server."
+          "description": "Base URL for Ollama server"
         },
         "snippy.ollama.routerModel": {
           "type": "string",
-          "default": "llama3.1",
-          "description": "Ollama model used (for free) to route tasks. Must be pulled locally."
+          "default": "llama3.2:3b",
+          "description": "Ollama model to use for routing"
         },
         "snippy.priceOverrides": {
           "type": "object",
-          "default": {},
-          "description": "Per-model price overrides (USD per MTok): { modelId: { inputPricePerMTok, outputPricePerMTok } }.",
-          "additionalProperties": {
-            "type": "object",
-            "properties": {
-              "inputPricePerMTok": { "type": "number" },
-              "outputPricePerMTok": { "type": "number" }
-            }
-          }
+          "description": "Override default Claude model pricing"
         }
       }
     }
   },
   "scripts": {
-    "vscode:prepublish": "npm run package",
-    "compile": "node esbuild.js",
-    "package": "node esbuild.js --production",
-    "watch": "node esbuild.js --watch",
+    "compile": "tsc -p ./tsconfig.json",
     "compile-tests": "tsc -p ./tsconfig.test.json",
-    "pretest": "npm run compile-tests",
-    "test": "node ./out-test/test/runUnit.js",
-    "lint": "eslint src --ext ts"
+    "watch": "tsc -watch -p ./tsconfig.json",
+    "test": "mocha ./out/test/**/*.js",
+    "package": "vsce package --no-dependencies",
+    "pretest": "npm run compile-tests && npm run compile"
   },
   "devDependencies": {
-    "@types/node": "^20.11.0",
+    "@types/mocha": "^10.0.6",
+    "@types/node": "20.11.17",
     "@types/vscode": "^1.85.0",
-    "@typescript-eslint/eslint-plugin": "^7.0.0",
-    "@typescript-eslint/parser": "^7.0.0",
-    "@vscode/vsce": "^2.24.0",
     "esbuild": "^0.20.0",
-    "eslint": "^8.56.0",
-    "typescript": "^5.4.0"
+    "mocha": "^10.4.0",
+    "nyc": "^15.1.0",
+    "typescript": "^5.3.3"
+  },
+  "dependencies": {
+    "vscode": "^1.1.37"
   }
 }
